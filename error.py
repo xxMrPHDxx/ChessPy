@@ -16,3 +16,9 @@ class IllegalBoardError(BaseException):
 		self._message = message
 	def __str__(self):
 		return f'IllegalBoardError: {self._message}'
+
+class InstantiateError(BaseException):
+	def __init__(self, message):
+		self._message = message
+	def __str__(self):
+		return f'InstantiateError: {self._message}'

@@ -29,15 +29,25 @@ class Board(object):
 		if not isinstance(builder, Board.Builder):
 			raise ArgumentError(f'Argument 1 is not a BoardBuilder object. Got {type(builder)}!')
 		self._tiles = builder.tiles
+		self.__enpassant_pawn = builder.enpassant_pawn
 		self._white_pieces, self._black_pieces = _separate_pieces(self._tiles)
 		white_moves, black_moves = _calculate_moves(self)
 		self.white_player, self.black_player = _create_player(self, white_moves, black_moves)
 		self.current_player = self.white_player if builder.move_maker == Alliance.White else self.black_player
-		# print(self.white_player, self.black_player)
+	# Properties / Getters
+	@property
+	def enpassant_pawn(self): return self.__enpassant_pawn
 	# Default methods
 	def get_all_pieces(self):
-		return [*self._white_pieces, * self._black_pieces]
+		return [*self._white_pieces, *self._black_pieces]
+	def get_opponent(self):
+		return self.white_player if self.current_player == self.black_player else self.black_player
+	def has_enpassant_pawn(self):
+		return self.enpassant_pawn != None
 	# Overrides
+	def __eq__(self, other):
+		if not isinstance(other, Board): return False
+		return str(self) == str(other)
 	def __str__(self):
 		return '\n'.join([' '.join([str(self._tiles[r*8+c]) for c in range(8)]) for r in range(8)])
 	def __getitem__(self, index):
@@ -50,10 +60,9 @@ class Board(object):
 		for i in range(64): yield self[i]
 	@staticmethod
 	def create_standard_board():
-		from piece import Piece, Knight
 		builder = Board.Builder()
 
-		# Black' & Whites' Pawn
+		# Blacks' & Whites' Pawn
 		for ally in [Alliance.White, Alliance.Black]:
 			offs = 48 if ally == Alliance.White else 8
 			for i in range(8): builder.set_piece(Pawn(ally, i+offs))
@@ -82,6 +91,7 @@ class Board(object):
 		def __init__(self):
 			self.tiles = [Tile(position) for position in range(64)]
 			self.move_maker = Alliance.White
+			self.enpassant_pawn = None
 		def set_move_maker(self, move_maker):
 			if not isinstance(move_maker, Alliance):
 				raise AllianceError(f'Invalid alliance: Found {type(move_maker)}!')
@@ -89,37 +99,18 @@ class Board(object):
 			return self
 		def set_piece(self, piece):
 			if not isinstance(piece, Piece):
-				raise ArgumentError(f'Argument 1 is not a Piece. Got {type(piece)}!')
+				raise ArgumentError(f'Argument 1 is not a Piece object. Got {type(piece)}!')
 			self.tiles[piece.position] = Tile(piece)
+			return self
+		def set_enpassant_pawn(self, pawn):
+			if not pawn == None and not isinstance(pawn, Pawn):
+				raise ArgumentError(f'Argument 1 is not a Pawn object. Got {type(pawn)}!')
+			self.enpassant_pawn = pawn
 			return self
 		def build(self):
 			return Board(self)
 
-board = Board.create_standard_board()
-_board = board
+if __name__ == '__main__':
+	from tests import enpassant_test
 
-from random import random
-
-# with open('moves.log', 'r') as file:
-# 	lines = file.read().split('='*60)
-# 	print(len(lines)+1)
-
-n = 792
-# n = 1000
-# print(n*8 + n - 1)
-print((7127+1)//9)
-
-exit()
-with open('moves.log', 'w') as file:
-	boards = []
-	while len(boards) < 1000:
-		moves = board.current_player.get_legal_moves()
-		index = int(random() * len(moves))
-		move = moves[index]
-		print(f'Executing move {move}...')
-		try:
-			board = move.execute()
-			boards.append(str(board))
-		except IllegalBoardError as e: 
-			print('Failed!')
-	file.write('\n{}\n'.format('=' * 60).join(boards))
+	enpassant_test()

@@ -17,7 +17,7 @@ class Piece(object):
 	Type.King = Type('King')
 	Type.Pawn = Type('Pawn')	
 
-	def __init__(self, _type, _ally, _pos):
+	def __init__(self, _type, _ally, _pos, _first_move):
 		from player import Alliance
 		if not isinstance(_type, Piece.Type):
 			raise ArgumentError(f'Argument 1 is not a Type object. Got {type(_type)}')
@@ -28,6 +28,7 @@ class Piece(object):
 		self._type = _type
 		self._ally = _ally
 		self._pos = _pos
+		self._first_move = _first_move
 	# Properties
 	@property
 	def type(self): return self._type
@@ -35,6 +36,14 @@ class Piece(object):
 	def alliance(self): return self._ally
 	@property
 	def position(self): return self._pos
+	@property
+	def first_move(self): return self._first_move
+	@property
+	def direction(self):
+		return -1 if self.alliance == Alliance.White else 1
+	@property
+	def opposite(self):
+		return -1 * self.direction
 	# Default Methods
 	def is_white(self): 
 		from player import Alliance
@@ -55,6 +64,12 @@ class Piece(object):
 	def is_seventh_column_excluded(self, pos, offset): return False
 	def is_eighth_column_excluded(self, pos, offset): return False
 	# Overrides
+	def __eq__(self, other):
+		if not isinstance(other, Piece): return False
+		return self.type == other.type and \
+			self.alliance == other.alliance and \
+			self.position == other.position and \
+			self.first_move == other.first_move
 	def __str__(self):
 		from player import Alliance
 		func = lambda x: x.upper()
@@ -65,7 +80,7 @@ class Piece(object):
 
 class Rook(Piece):
 	def __init__(self, ally, pos, first_move=True):
-		Piece.__init__(self, Piece.Type.Rook, ally, pos)
+		Piece.__init__(self, Piece.Type.Rook, ally, pos, first_move)
 	def calculate_moves(self, board):
 		legal_moves = Piece.calculate_moves(self, board)
 		for offset in [ -8, -1, 1, 8 ]:
@@ -90,7 +105,7 @@ class Rook(Piece):
 
 class Knight(Piece):
 	def __init__(self, ally, pos, first_move=True):
-		Piece.__init__(self, Piece.Type.Knight, ally, pos)
+		Piece.__init__(self, Piece.Type.Knight, ally, pos, first_move)
 	def calculate_moves(self, board):
 		legal_moves = Piece.calculate_moves(self, board)
 		for offset in [ -17, -15, -10, -6, 6, 10, 15, 17 ]:
@@ -117,7 +132,7 @@ class Knight(Piece):
 
 class Bishop(Piece):
 	def __init__(self, ally, pos, first_move=True):
-		Piece.__init__(self, Piece.Type.Bishop, ally, pos)
+		Piece.__init__(self, Piece.Type.Bishop, ally, pos, first_move)
 	def calculate_moves(self, board):
 		legal_moves = Piece.calculate_moves(self, board)
 		for offset in [ -9, -7, 7, 9 ]:
@@ -142,7 +157,7 @@ class Bishop(Piece):
 
 class Queen(Piece):
 	def __init__(self, ally, pos, first_move=True):
-		Piece.__init__(self, Piece.Type.Queen, ally, pos)
+		Piece.__init__(self, Piece.Type.Queen, ally, pos, first_move)
 	def calculate_moves(self, board):
 		legal_moves = Piece.calculate_moves(self, board)
 		for offset in [ -9, -8, -7, -1, 1, 7, 8, 9 ]:
@@ -167,7 +182,7 @@ class Queen(Piece):
 
 class King(Piece):
 	def __init__(self, ally, pos, first_move=True):
-		Piece.__init__(self, Piece.Type.King, ally, pos)
+		Piece.__init__(self, Piece.Type.King, ally, pos, first_move)
 	def calculate_moves(self, board):
 		legal_moves = Piece.calculate_moves(self, board)
 		for offset in [ -9, -8, -7, -1, 1, 7, 8, 9 ]:
@@ -189,12 +204,34 @@ class King(Piece):
 
 class Pawn(Piece):
 	def __init__(self, ally, pos, first_move=True):
-		Piece.__init__(self, Piece.Type.Pawn, ally, pos)
+		Piece.__init__(self, Piece.Type.Pawn, ally, pos, first_move)
 	def calculate_moves(self, board):
 		legal_moves = Piece.calculate_moves(self, board)
 		for offset in [ 7, 8, 9, 16 ]:
-			dest = self.position + offset
+			dest = self.position + offset * self.direction
 			if not BoardUtils.is_valid(dest) or self.has_exclusion(self.position, offset): continue
+			tile = board[dest]
+			if offset == 16: # Pawn Jump
+				behind_tile = board[dest + 8 * self.opposite]
+				if self.first_move and tile.is_empty() and behind_tile.is_empty():
+					enpassant = False
+					for beside in [board[dest + off] for off in [-1, 1]]:
+						if beside.is_empty(): continue
+						enpassant = True
+					legal_moves.append(PawnJump(board, self, dest, enpassant))
+			elif offset == 8: # Pawn Move
+				if tile.is_empty():
+					legal_moves.append(PawnMove(board, self, dest))
+			else:
+				if not tile.is_empty() and tile.piece.alliance != self.alliance:
+					# Pawn Attack Move
+					legal_moves.append(PawnAttack(board, self, dest, tile.piece))
+				elif board.has_enpassant_pawn():
+					# Pawn Enpassant Attack
+					pawn = board.enpassant_pawn
+					behind_pawn = pawn.position + 8 * pawn.opposite
+					if dest == behind_pawn and pawn.alliance != self.alliance:
+						legal_moves.append(PawnEnPassantAttack(board, self, dest, pawn))
 		return legal_moves
 	def move_piece(self, dest):
 		return Pawn(self.alliance, dest, False)
