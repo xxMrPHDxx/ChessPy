@@ -43,7 +43,7 @@ def create_board_from_array(config, move_maker=Alliance.White, enpassant_pawn=No
 		.set_move_maker(move_maker) \
 		.build()
 
-def enpassant_test():
+def test_enpassant():
 	board = create_board_from_array([
 		 1, 2, 3, 4, 5, 3, 2, 1,
 		 0, 6, 0, 6, 6, 6, 6, 6,
@@ -82,7 +82,7 @@ def enpassant_test():
 	])
 	assert board == board2, 'Board 2 is not equal'
 
-def castling_test():
+def test_castling():
 	board = create_board_from_array([
 		 1, 0, 0, 0, 5, 0, 0, 1,
 		 6, 0, 6, 4, 6, 6, 0, 6,
