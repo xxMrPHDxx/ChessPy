@@ -2,6 +2,7 @@ from error import *
 from tile import Tile
 from player import Alliance, Player
 from piece import Piece, Rook, Knight, Bishop, Queen, King, Pawn
+from move import MoveFactory
 
 def _separate_pieces(tiles):
 	whites, blacks = [[] for _ in range(2)]
@@ -119,3 +120,8 @@ if __name__ == '__main__':
 	from tests import enpassant_test
 
 	enpassant_test()
+
+	from gui.frame import GuiChess
+
+	app = GuiChess(Board.create_standard_board(), MoveFactory)
+	app.mainloop()
