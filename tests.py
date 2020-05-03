@@ -2,6 +2,7 @@ from board import Board
 from move import MoveFactory
 from player import Alliance
 from piece import Rook, Knight, Bishop, Queen, King, Pawn
+from utils import BoardUtils
 
 from functools import reduce
 
@@ -28,11 +29,18 @@ def create_board_from_array(config, move_maker=Alliance.White, enpassant_pawn=No
 		if tile != 0:
 			_ally = Alliance.White if tile < 0 else Alliance.Black
 			Piece = [None, Rook, Knight, Bishop, Queen, King, Pawn][abs(tile)]
-			builder.set_piece(Piece(_ally, pos, first_move))
+			piece = Piece(_ally, pos, first_move)
+			if enpassant_pawn != None and all([
+				isinstance(piece, Pawn),
+				type(enpassant_pawn) == int,
+				BoardUtils.is_valid(enpassant_pawn),
+				pos == enpassant_pawn
+			]):
+				builder.set_enpassant_pawn(piece)
+			builder.set_piece(piece)
 		return builder
 	return reduce(process_tile, enumerate(config), Board.Builder()) \
 		.set_move_maker(move_maker) \
-		.set_enpassant_pawn(enpassant_pawn) \
 		.build()
 
 def enpassant_test():
@@ -47,7 +55,7 @@ def enpassant_test():
 	])
 
 	transition = MoveFactory.create_move(board, 49, 33)
-	assert transition.is_success()
+	assert transition.is_success(), 'Failed to execute PawnJump from 49 to 33!'
 	board = transition.board
 	board1 = create_board_from_array([
 		 1, 2, 3, 4, 5, 3, 2, 1,
@@ -57,10 +65,20 @@ def enpassant_test():
 		 0, 0, 0, 0, 0, 0, 0, 0,
 		-6, 0,-6,-6,-6,-6,-6,-6,
 		-1,-2,-3,-4,-5,-3,-2,-1
-	])
-	assert board == board1, 'Board is not equal!'
+	], enpassant_pawn=33)
+	assert board == board1, 'Board 1 is not equal!'
 
 	transition = MoveFactory.create_move(board, 32, 41)
-	if transition.is_success():
-		board = transition.board
+	assert transition.is_success(), 'Failed to execute PawnEnPassantAttack from 32 to 41!'
+	board = transition.board
+	board2 = create_board_from_array([
+		 1, 2, 3, 4, 5, 3, 2, 1,
+		 0, 6, 0, 6, 6, 6, 6, 6,
+		*[0 for _ in range(16)],
+		 0, 0, (6, False), 0, 0, 0, 0, 0,
+		 0, (6, False), 0, 0, 0, 0, 0, 0,
+		-6, 0,-6,-6,-6,-6,-6,-6,
+		-1,-2,-3,-4,-5,-3,-2,-1
+	])
+	assert board == board2, 'Board 2 is not equal'
 	print(board)

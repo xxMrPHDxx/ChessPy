@@ -24,8 +24,18 @@ class Player(object):
 	# Properties and getters
 	@property
 	def board(self): return self._board
+	@property
+	def active_pieces(self): return self._pieces
 	# Default methods
 	def get_legal_moves(self): return self._moves
+	def get_active_pieces(self): return self._pieces
 	# Overrides
+	def __eq__(self, other):
+		if not isinstance(other, Player): return False
+		return all([
+			str(self) == str(other),
+			len(self.active_pieces) == len(other.active_pieces),
+			all([self.active_pieces[i] == other.active_pieces[i] for i in range(len(self.active_pieces))])
+		])
 	def __str__(self):
 		return f'{str(self._ally)}Player[{len(self._pieces)} pieces, {len(self._moves)} moves]'

@@ -47,7 +47,12 @@ class Board(object):
 	# Overrides
 	def __eq__(self, other):
 		if not isinstance(other, Board): return False
-		return str(self) == str(other)
+		return all([
+			str(self) == str(other),
+			self.enpassant_pawn == other.enpassant_pawn,
+			self.white_player == other.white_player,
+			self.black_player == other.black_player
+		])
 	def __str__(self):
 		return '\n'.join([' '.join([str(self._tiles[r*8+c]) for c in range(8)]) for r in range(8)])
 	def __getitem__(self, index):
