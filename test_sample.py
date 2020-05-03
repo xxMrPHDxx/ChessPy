@@ -105,8 +105,3 @@ def test_castling():
 			except: success = False
 			error_message = f'Failed to execute CastlingMove {i+1} for {str(player.alliance)}Player!'
 			assert success, error_message
-
-
-if __name__ == '__main__':
-	enpassant_test()
-	castling_test()
