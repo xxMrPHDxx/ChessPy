@@ -46,20 +46,24 @@ class GuiBoard(Canvas):
 				if move.position != index: continue
 				has_move = True
 				row, col = [fun(move.destination) for fun in [lambda x: x//8, lambda x: x%8]]
-				self.__hints.append(((col+1)*56, (row+1)*56, move.is_attack_move()))
+				is_castling = str(move)[:12] == 'CastlingMove'
+				self.__hints.append(((col+1)*56, (row+1)*56, move.is_attack_move(), is_castling))
 			if not has_move: return
 			self.__src_tile = tile
 		else:
 			# Second click
-			_from, _to = self.__src_tile.position, tile.position
-			transition = self.MoveFactory.create_move(self.board, _from, _to)
-			if transition.is_success():
-				self.__set_board(transition.board)
+			if self.__src_tile.position != tile.position:
+				_from, _to = self.__src_tile.position, tile.position
+				transition = self.MoveFactory.create_move(self.board, _from, _to)
+				if transition.is_success():
+					self.__set_board(transition.board)
 			self.__reset_tiles()
 		self.draw_board()
 	def __draw_fg_hints(self):
-		for x, y, is_attack in self.__hints:
-			img = self.__red_dot if is_attack != True else self.__green_dot
+		for x, y, is_attack, is_castling in self.__hints:
+			img = self.__castling \
+				if is_castling \
+				else (self.__red_dot if is_attack != True else self.__green_dot)
 			self.create_image((x, y), image=img)
 	# Private static methods
 	@staticmethod

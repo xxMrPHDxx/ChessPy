@@ -25,6 +25,8 @@ class Player(object):
 	@property
 	def board(self): return self._board
 	@property
+	def alliance(self): return self._ally
+	@property
 	def active_pieces(self): return self._pieces
 	# Default methods
 	def get_legal_moves(self): return self._moves

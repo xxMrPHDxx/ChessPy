@@ -117,10 +117,6 @@ class Board(object):
 			return Board(self)
 
 if __name__ == '__main__':
-	from tests import enpassant_test
-
-	enpassant_test()
-
 	from gui.frame import GuiChess
 
 	app = GuiChess(Board.create_standard_board(), MoveFactory)

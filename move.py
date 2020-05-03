@@ -102,12 +102,21 @@ class PawnEnPassantAttack(PawnAttack):
 	def execute(self):
 		return PawnAttack.execute(self)
 
-class CastlingMove(MajorMove):
+class CastlingMove(Move):
 	def __init__(self, board, rook, dest, king):
-		MajorMove.__init__(self, board, rook, dest)
-		self.king = king
+		Move.__init__(self, board, rook, dest, None)
+		self.__king = king
+		self.__direction = -1 if king.position > rook.position else 1
 	def execute(self):
-		return self.board
+		builder = Move.execute(self, True)
+		for piece in self.board.get_all_pieces():
+			if piece == self.piece or piece == self.__king: continue
+			builder.set_piece(piece)
+		return builder \
+			.set_piece(self.piece.move_piece(self.destination)) \
+			.set_piece(self.__king.move_piece(self.__king.position + self.__direction)) \
+			.set_move_maker(self.piece.get_opponent()) \
+			.build()
 
 #================================================================#
 #                       Move Factory Stuff                       #

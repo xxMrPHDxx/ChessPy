@@ -1,5 +1,5 @@
 from board import Board
-from move import MoveFactory
+from move import MoveFactory, CastlingMove
 from player import Alliance
 from piece import Rook, Knight, Bishop, Queen, King, Pawn
 from utils import BoardUtils
@@ -81,4 +81,32 @@ def enpassant_test():
 		-1,-2,-3,-4,-5,-3,-2,-1
 	])
 	assert board == board2, 'Board 2 is not equal'
-	print(board)
+
+def castling_test():
+	board = create_board_from_array([
+		 1, 0, 0, 0, 5, 0, 0, 1,
+		 6, 0, 6, 4, 6, 6, 0, 6,
+		 (3, False), (6, False), (2, False), (6, False), 0, (2, False), (6, False), (3, False),
+		*[0 for _ in range(16)],
+		(-3, False),(-6, False),(-2, False),(-6, False), 0,(-2, False),(-6, False),(-3, False),
+		-6, 0,-6,(-4, False),-6,-6, 0,-6,
+		-1, 0, 0, 0,-5, 0, 0,-1
+	])
+	for player in [board.white_player, board.black_player]:
+		castling_moves = [
+			move 
+			for move in player.get_legal_moves()
+			if isinstance(move, CastlingMove)
+		]
+		assert len(castling_moves) == 2, 'Failed to obtain 2 castling moves on the queen and king side!'
+		for i, castling_move in enumerate(castling_moves):
+			success = True
+			try: castling_move.execute()
+			except: success = False
+			error_message = f'Failed to execute CastlingMove {i+1} for {str(player.alliance)}Player!'
+			assert success, error_message
+
+
+if __name__ == '__main__':
+	enpassant_test()
+	castling_test()

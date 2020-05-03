@@ -92,6 +92,12 @@ class Rook(Piece):
 				if not tile.is_empty():
 					if piece.alliance != self.alliance:
 						legal_moves.append(AttackMove(board, self, dest, piece))
+					elif all([
+						isinstance(piece, King),
+						piece.first_move,
+						self.first_move
+					]):
+						legal_moves.append(CastlingMove(board, self, dest, piece))
 					break
 				else:
 					legal_moves.append(MajorMove(board, self, dest))
