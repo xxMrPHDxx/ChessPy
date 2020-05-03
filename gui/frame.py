@@ -1,4 +1,5 @@
 from tkinter import *
+from .stack import Stack
 
 from functools import reduce
 
@@ -16,6 +17,7 @@ class GuiBoard(Canvas):
 		self.bind('<Button-1>', self.__on_click())
 		self.__reset_tiles()
 		self.__hints = []
+		self.__history = Stack()
 	# Properties & getters
 	@property
 	def board(self): return self.__master.board
@@ -56,6 +58,7 @@ class GuiBoard(Canvas):
 				_from, _to = self.__src_tile.position, tile.position
 				transition = self.MoveFactory.create_move(self.board, _from, _to)
 				if transition.is_success():
+					self.__history.push(self.board)
 					self.__set_board(transition.board)
 			self.__reset_tiles()
 		self.draw_board()
@@ -98,6 +101,13 @@ class GuiBoard(Canvas):
 			y, x = [(arg+1)*56 for arg in [tile.piece.position // 8, tile.piece.position % 8]]
 			self.create_image((x, y), image=image)
 		self.__draw_fg_hints()
+	def undo_move(self):
+		def inner(event):
+			last_board = self.__history.peek()
+			if self.board != last_board and self.__history.pop(): 
+				self.__master.set_board(last_board)
+				self.draw_board()
+		return inner
 
 class GuiChess(Tk):
 	def __init__(self, board=None, MoveFactory=None):
@@ -106,5 +116,6 @@ class GuiChess(Tk):
 		self.gui_board = GuiBoard(self, MoveFactory)
 		self.set_board(board)
 		self.gui_board.draw_board()
+		self.bind('<Control-z>', self.gui_board.undo_move())
 	def set_board(self, board):
 		self.board = board
