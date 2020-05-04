@@ -1,8 +1,6 @@
 from board import Board
 from move import MoveFactory, CastlingMove
 from player import Alliance
-from piece import Rook, Knight, Bishop, Queen, King, Pawn
-from utils import BoardUtils
 
 def separator(sep='*'*60): print(sep)
 
@@ -66,10 +64,6 @@ def test_stale_mate():
 	assert not board.current_player.is_in_check(), 'Black player is in check!'
 	assert not board.current_player.is_in_check_mate(), 'Black player is in check mate!'
 	assert board.current_player.is_in_stale_mate(), 'Black player is not in stale mate!'
-
-test_in_check()
-test_check_mate()
-test_stale_mate()
 
 def test_enpassant():
 	board = Board.create_board_from_array([

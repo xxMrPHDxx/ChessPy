@@ -3,6 +3,7 @@ from tile import Tile
 from player import Alliance, Player
 from piece import Piece, Rook, Knight, Bishop, Queen, King, Pawn
 from move import MoveFactory
+from utils import BoardUtils
 
 from random import random
 from functools import reduce
