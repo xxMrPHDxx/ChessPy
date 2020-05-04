@@ -4,6 +4,9 @@ from player import Alliance, Player
 from piece import Piece, Rook, Knight, Bishop, Queen, King, Pawn
 from move import MoveFactory
 
+from random import random
+from functools import reduce
+
 def _separate_pieces(tiles):
 	whites, blacks = [[] for _ in range(2)]
 	for tile in tiles:
@@ -45,6 +48,10 @@ class Board(object):
 		return self.white_player if self.current_player == self.black_player else self.black_player
 	def has_enpassant_pawn(self):
 		return self.enpassant_pawn != None
+	def get_random_move(self):
+		moves = self.current_player.get_legal_moves()
+		index = int(random() * len(moves))
+		return moves[index]
 	# Overrides
 	def __eq__(self, other):
 		if not isinstance(other, Board): return False
@@ -64,6 +71,7 @@ class Board(object):
 		return self._tiles[index]
 	def __iter__(self):
 		for i in range(64): yield self[i]
+	# Static methods
 	@staticmethod
 	def create_standard_board():
 		builder = Board.Builder()
@@ -92,6 +100,35 @@ class Board(object):
 			.set_piece(Knight(Alliance.White, 63-6)) \
 			.set_piece(Rook  (Alliance.White, 63-7)) \
 			.build()
+	@staticmethod
+	def create_board_from_array(config, move_maker=Alliance.White, enpassant_pawn=None):
+		if not (isinstance(config, list) or len(config) != 64):
+			if len(config) < 64: 
+				for _ in range(64-len(config)): config.append(0)
+			else: 
+				raise Exception('Invalid config!')
+		def process_tile(builder, args):
+			pos, args = args
+			if type(args) == int: tile, first_move = args, True
+			elif len(args) == 2: tile, first_move = args
+			else:
+				raise Exception(f'Invalid board config!')
+			if tile != 0:
+				_ally = Alliance.White if tile < 0 else Alliance.Black
+				Piece = [None, Rook, Knight, Bishop, Queen, King, Pawn][abs(tile)]
+				piece = Piece(_ally, pos, first_move)
+				if enpassant_pawn != None and all([
+					isinstance(piece, Pawn),
+					type(enpassant_pawn) == int,
+					BoardUtils.is_valid(enpassant_pawn),
+					pos == enpassant_pawn
+				]):
+					builder.set_enpassant_pawn(piece)
+				builder.set_piece(piece)
+			return builder
+		return reduce(process_tile, enumerate(config), Board.Builder()) \
+			.set_move_maker(move_maker) \
+			.build()
 
 	class Builder(object):
 		def __init__(self):
@@ -119,5 +156,5 @@ class Board(object):
 if __name__ == '__main__':
 	from gui.frame import GuiChess
 
-	app = GuiChess(Board.create_standard_board(), MoveFactory)
+	app = GuiChess(Board.create_standard_board(), MoveFactory) # 
 	app.mainloop()

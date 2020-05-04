@@ -7,7 +7,7 @@ class GuiBoard(Canvas):
 	def __init__(self, master, MoveFactory):
 		if not MoveFactory: raise Exception('Please supply MoveFactory at argument 2!')
 		Canvas.__init__(self, master, width=504, height=504)
-		self.MoveFactory = MoveFactory
+		self.__MoveFactory = MoveFactory
 		self.__master = master
 		self.__board_img = PhotoImage(file='img/board.png')
 		self.__center = { 'x': self.winfo_width()//2, 'y': self.winfo_height()//2 }
@@ -56,7 +56,7 @@ class GuiBoard(Canvas):
 			# Second click
 			if self.__src_tile.position != tile.position:
 				_from, _to = self.__src_tile.position, tile.position
-				transition = self.MoveFactory.create_move(self.board, _from, _to)
+				transition = self.__MoveFactory.create_move(self.board, _from, _to)
 				if transition.is_success():
 					self.__history.push(self.board)
 					self.__set_board(transition.board)

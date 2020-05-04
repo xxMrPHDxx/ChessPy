@@ -152,7 +152,20 @@ class MoveFactory(object):
 		raise InstantiateError('Cannot instantiate MoveFactory!')
 	@staticmethod
 	def create_move(board, position, destination):
+		player_in_check = any([player.is_in_check() for player in [
+			board.current_player, board.get_opponent()
+		]])
 		for move in board.current_player.get_legal_moves():
 			if move.position == position and move.destination == destination:
-				return MoveTransition(MoveStatus.Success, move.execute())
+				try: new_board = move.execute()
+				except: break
+				if player_in_check:
+					# Only executed when any player in current board is in check
+					for before, after in [
+						(board.current_player, new_board.get_opponent()),
+						(board.get_opponent(), new_board.current_player)
+					]:
+						if before.is_in_check() and after.is_in_check():
+							return MoveTransition(MoveStatus.LeavesPlayerInCheck, board)
+				return MoveTransition(MoveStatus.Success, new_board)
 		return MoveTransition(MoveStatus.Illegal, board)

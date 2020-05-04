@@ -41,9 +41,8 @@ class Player(object):
 	# Overrides
 	def __eq__(self, other):
 		if not isinstance(other, Player): return False
-		return all([
+		return len(self.active_pieces) == len(other.active_pieces) and all([
 			str(self) == str(other),
-			len(self.active_pieces) == len(other.active_pieces),
 			all([self.active_pieces[i] == other.active_pieces[i] for i in range(len(self.active_pieces))])
 		])
 	def __str__(self):
@@ -63,9 +62,7 @@ class Player(object):
 			try:
 				board = move.execute()
 				if board.get_opponent().is_in_check(): 
-					del board
 					continue
-				del board
 				escape_moves.append(move)
 			except: pass
 		return len(escape_moves) > 0
