@@ -43,6 +43,33 @@ def create_board_from_array(config, move_maker=Alliance.White, enpassant_pawn=No
 		.set_move_maker(move_maker) \
 		.build()
 
+def test_board():
+	board = Board.create_standard_board()
+	assert board.current_player.alliance == Alliance.White, 'White Player should start first!'
+	assert len(board.current_player.active_pieces) == 16, 'White Player doesn\'t have 16 active pieces!'
+	assert len(board.get_opponent().active_pieces) == 16, 'Black Player doesn\'t have 16 active pieces!'
+	assert len(board.current_player.get_legal_moves()) == 20, 'White Player doesn\'t have 20 moves!'
+	assert len(board.get_opponent().get_legal_moves()) == 20, 'Black Player doesn\'t have 20 moves!'
+	assert not board.has_enpassant_pawn(), 'Board should not have enpassant pawn!'
+
+def test_check_cases():
+	board = Board.create_standard_board()
+	assert not board.current_player.is_in_check(), 'White Player should not in check!'
+	assert not board.get_opponent().is_in_check(), 'Black Player should not in check!'
+	assert not board.current_player.is_in_check_mate(), 'White Player should not in check mate!'
+	assert not board.get_opponent().is_in_check_mate(), 'Black Player should not in check mate!'
+	assert not board.current_player.is_in_stale_mate(), 'White Player should not in stale mate!'
+	assert not board.get_opponent().is_in_stale_mate(), 'Black Player should not in stale mate!'
+
+def test_move_execution():
+	board = Board.create_standard_board()
+	for i in range(10):
+		move = get_random_move(board)
+		is_success = True
+		try: board = move.execute()
+		except: is_success = False
+		assert is_success, f'Failed to execute move {i+1}: {move}'
+
 def test_enpassant():
 	board = create_board_from_array([
 		 1, 2, 3, 4, 5, 3, 2, 1,
