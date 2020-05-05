@@ -215,7 +215,8 @@ class Pawn(Piece):
 		legal_moves = Piece.calculate_moves(self, board)
 		for offset in [ 7, 8, 9, 16 ]:
 			dest = self.position + offset * self.direction
-			if not BoardUtils.is_valid(dest) or self.has_exclusion(self.position, offset): continue
+			if not BoardUtils.is_valid(dest) or self.has_exclusion(self.position, offset * self.direction):
+				continue
 			tile = board[dest]
 			if offset == 16: # Pawn Jump
 				behind_tile = board[dest + 8 * self.opposite]
@@ -239,5 +240,9 @@ class Pawn(Piece):
 					if dest == behind_pawn and pawn.alliance != self.alliance:
 						legal_moves.append(PawnEnPassantAttack(board, self, dest, pawn))
 		return legal_moves
+	def is_first_column_excluded(self, pos, offset):
+		return BoardUtils.is_first_column(pos) and offset in [-9, 7]
+	def is_eighth_column_excluded(self, pos, offset):
+		return BoardUtils.is_eighth_column(pos) and offset in [-7, 9]
 	def move_piece(self, dest):
 		return Pawn(self.alliance, dest, False)
