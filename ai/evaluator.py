@@ -9,7 +9,7 @@ __PIECES_VALUES = {
 	'p': 100
 }
 
-_BoardEvaluator__CHECK_BONUS = 90
+_BoardEvaluator__CHECK_BONUS = 50
 _BoardEvaluator__CHECK_MATE_BONUS = 1000
 _BoardEvaluator__DEPTH_BONUS = 10
 

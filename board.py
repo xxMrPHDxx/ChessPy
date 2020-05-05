@@ -53,6 +53,8 @@ class Board(object):
 		moves = self.current_player.get_legal_moves()
 		index = int(random() * len(moves))
 		return moves[index]
+	def is_game_over(self):
+		return self.current_player.is_in_check_mate() or self.current_player.is_in_stale_mate()
 	# Overrides
 	def __eq__(self, other):
 		if not isinstance(other, Board): return False

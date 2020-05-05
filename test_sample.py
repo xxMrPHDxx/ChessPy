@@ -133,13 +133,28 @@ def test_minimax():
 	from ai.evaluator import BoardEvaluator
 	from move import AttackMove
 
-	ai = MiniMax(BoardEvaluator())
+	ai = MiniMax(BoardEvaluator(), 2)
 
 	board = Board.create_board_from_array([
 		 0, 0, 0, 0, 5, 0, 0, 1,
 		*[0 for _ in range(48)],
-		 0, 0, 0, 0,-5, 0, 0,-1,
+		 0, 0, 0, 0,-5, 0, 0,(-1, False),
 	])
-	best_move = ai.execute(board, 2)
+	best_move = ai.execute(board)
 	expected_best_move = AttackMove(board, board[63].piece, 7, board[7].piece)
+	assert best_move == expected_best_move, f'Best move should be {expected_best_move}. Got {best_move}!'
+
+def test_alpha_beta_pruning():
+	from ai.alphabetapruning import AlphaBetaPruning
+	from ai.evaluator import BoardEvaluator
+
+	ai = AlphaBetaPruning(BoardEvaluator(), 2)
+
+	board = Board.create_board_from_array([
+		 1, 0, 0, 0, 5, 0, 0, 1,
+		*[0 for _ in range(48)],
+		-1, 0, 0, 0,-5, 0, 0,-1,
+	])
+	best_move = ai.execute(board)
+	expected_best_move = CastlingMove(board, board[63].piece, 60, board[60].piece)
 	assert best_move == expected_best_move, f'Best move should be {expected_best_move}. Got {best_move}!'
