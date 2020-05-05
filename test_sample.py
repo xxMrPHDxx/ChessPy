@@ -140,6 +140,6 @@ def test_minimax():
 		*[0 for _ in range(48)],
 		 0, 0, 0, 0,-5, 0, 0,-1,
 	])
-	best_move = ai.execute(board, 1)
+	best_move = ai.execute(board, 2)
 	expected_best_move = AttackMove(board, board[63].piece, 7, board[7].piece)
 	assert best_move == expected_best_move, f'Best move should be {expected_best_move}. Got {best_move}!'

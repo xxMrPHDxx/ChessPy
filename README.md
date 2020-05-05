@@ -1,5 +1,7 @@
 # ChessPy
 
+![Python application](https://github.com/xxMrPHDxx/ChessPy/workflows/Python%20application/badge.svg?branch=master)
+
 ### About
 A ported version of Chess-Cpp (C++ & SFML) and Chess (Java) into python using Python 3.
 
