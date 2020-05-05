@@ -1,5 +1,5 @@
 from board import Board
-from move import MoveFactory, CastlingMove
+from move import *
 from player import Alliance
 
 def separator(sep='*'*60): print(sep)
@@ -38,7 +38,6 @@ def test_in_check():
 		*[0 for _ in range(40)],
 		 0, 0, 0, 0,-5, 0, 0, 0,
 	], Alliance.Black)
-	print(board)
 	assert board.current_player.is_in_check(), 'Black player is in check!'
 	assert not board.current_player.is_in_check_mate(), 'Black player is in check mate!'
 	assert not board.current_player.is_in_stale_mate(), 'Black player is in stale mate!'
@@ -131,17 +130,17 @@ def test_castling():
 def test_minimax():
 	from ai.minimax import MiniMax
 	from ai.evaluator import BoardEvaluator
-	from move import AttackMove
 
 	ai = MiniMax(BoardEvaluator(), 2)
 
 	board = Board.create_board_from_array([
-		 0, 0, 0, 0, 5, 0, 0, 1,
-		*[0 for _ in range(48)],
-		 0, 0, 0, 0,-5, 0, 0,(-1, False),
+		 0, 0, 0, 0, 5, 0, 0, 0,
+		*[0 for _ in range(40)],
+		-4, 0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0,-4,-5,-4, 0, 0
 	])
 	best_move = ai.execute(board)
-	expected_best_move = AttackMove(board, board[63].piece, 7, board[7].piece)
+	expected_best_move = MajorMove(board, board[48].piece, 20)
 	assert best_move == expected_best_move, f'Best move should be {expected_best_move}. Got {best_move}!'
 
 def test_alpha_beta_pruning():
@@ -151,10 +150,11 @@ def test_alpha_beta_pruning():
 	ai = AlphaBetaPruning(BoardEvaluator(), 2)
 
 	board = Board.create_board_from_array([
-		 1, 0, 0, 0, 5, 0, 0, 1,
-		*[0 for _ in range(48)],
-		-1, 0, 0, 0,-5, 0, 0,-1,
+		 0, 0, 0, 0, 5, 0, 0, 0,
+		*[0 for _ in range(40)],
+		-3, 0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0,-4,-5,-4, 0, 0
 	])
 	best_move = ai.execute(board)
-	expected_best_move = CastlingMove(board, board[63].piece, 60, board[60].piece)
+	expected_best_move = MajorMove(board, board[61].piece, 13)
 	assert best_move == expected_best_move, f'Best move should be {expected_best_move}. Got {best_move}!'

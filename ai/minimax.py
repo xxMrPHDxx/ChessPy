@@ -21,7 +21,7 @@ class MiniMax(object):
 				min_value, best_move = value, move
 		return best_move
 	def __min(self, board, depth):
-		if self.__depth == 0 or board.is_game_over():
+		if depth == 0 or board.is_game_over():
 			return self.__evaluator.evaluate(board, depth)
 		min_value = 1e10
 		for move in board.current_player.get_legal_moves():

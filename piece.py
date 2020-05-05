@@ -49,6 +49,7 @@ class Piece(object):
 		from player import Alliance
 		return self._ally == Alliance.White
 	def is_black(self): return not self.is_white();
+	def is_first_move(self): return self.first_move
 	def has_exclusion(self, pos, offset):
 		return self.is_first_column_excluded(pos, offset) or \
 				self.is_second_column_excluded(pos, offset) or \
