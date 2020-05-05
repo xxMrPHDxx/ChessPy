@@ -127,3 +127,19 @@ def test_castling():
 			except: success = False
 			error_message = f'Failed to execute CastlingMove {i+1} for {str(player.alliance)}Player!'
 			assert success, error_message
+
+def test_minimax():
+	from ai.minimax import MiniMax
+	from ai.evaluator import BoardEvaluator
+	from move import AttackMove
+
+	ai = MiniMax(BoardEvaluator())
+
+	board = Board.create_board_from_array([
+		 0, 0, 0, 0, 5, 0, 0, 1,
+		*[0 for _ in range(48)],
+		 0, 0, 0, 0,-5, 0, 0,-1,
+	])
+	best_move = ai.execute(board, 1)
+	expected_best_move = AttackMove(board, board[63].piece, 7, board[7].piece)
+	assert best_move == expected_best_move, f'Best move should be {expected_best_move}. Got {best_move}!'
